@@ -1,16 +1,17 @@
 package vkubelet
 
 import (
-	"strings"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/virtual-kubelet/virtual-kubelet/manager"
 	"github.com/virtual-kubelet/virtual-kubelet/providers/azure"
+	"github.com/virtual-kubelet/virtual-kubelet/providers/ecs"
 	"github.com/virtual-kubelet/virtual-kubelet/providers/hypersh"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -73,6 +74,11 @@ func New(nodeName, operatingSystem, namespace, kubeConfig, taint, provider, prov
 		if err != nil {
 			return nil, err
 		}
+	case "ecs":
+		p, err = ecs.NewECSProvider(providerConfig, rm, nodeName, operatingSystem)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		fmt.Printf("Provider '%s' is not supported\n", provider)
 	}
@@ -116,9 +122,9 @@ func (s *Server) registerNode() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: s.nodeName,
 			Labels: map[string]string{
-				"type":				"virtual-kubelet",
-				"kubernetes.io/role":		"agent",
-				"beta.kubernetes.io/os":	strings.ToLower(s.provider.OperatingSystem()),
+				"type":                  "virtual-kubelet",
+				"kubernetes.io/role":    "agent",
+				"beta.kubernetes.io/os": strings.ToLower(s.provider.OperatingSystem()),
 			},
 			Annotations: map[string]string{
 				"alpha.service-controller.kubernetes.io/exclude-balancer": "true",

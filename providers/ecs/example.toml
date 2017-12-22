@@ -1,0 +1,6 @@
+# example configuration file for ecs virtual-kubelet
+
+Region = "us-east-1"
+SecurityGroup = "sg-"
+Subnet = "subnet-"
+ClusterName = "foobar"
