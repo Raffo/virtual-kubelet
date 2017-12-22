@@ -11,14 +11,16 @@ jobs:
       - run:
           name: Create the credentials file
           command: sh scripts/createCredentials.sh
-      - run:
-          name: Build and deploy connector
-          command: sh scripts/envCreation.sh
       - run: |
           echo 'export AZURE_AUTH_LOCATION=${outputPathCredsfile}' >> $BASH_ENV
+      - run: |
+          echo 'export KUBECONFIG=${outputPathKubeConfigFile}' >> $BASH_ENV
       - run:
           name: Dependencies
           command: go get -v -t -d ./...
       - run:
+          name: Build
+          command: V=1 make build
+      - run:
           name: Tests
-          command: go test -v ./...
+          command: V=1 CI=1 make test
